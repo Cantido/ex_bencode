@@ -9,10 +9,10 @@ defmodule ExBencode do
   ## Examples
 
       iex> ExBencode.decode(nil)
-      {:ok, nil}
+      {:error, :not_bencoded_form}
 
       iex> ExBencode.decode("")
-      {:ok, nil}
+      {:error, :not_bencoded_form}
 
       iex> ExBencode.decode("i10e")
       {:ok, 10}
@@ -23,23 +23,21 @@ defmodule ExBencode do
       iex> ExBencode.decode("i")
       {:error, :not_bencoded_form}
 
+      iex> ExBencode.decode("abcdef")
+      {:error, :not_bencoded_form}
+
   """
   def decode(b)
 
 
   def decode(nil) do
-    {:ok, nil}
-  end
-
-  def decode("i") do
     {:error, :not_bencoded_form}
   end
 
   def decode(s) do
-    case String.length(s) do
-      0 -> {:ok, nil}
-      x when x <= 2 -> {:error, :not_bencoded_form}
-      _ -> {:ok, extract_int(s)}
+    cond do
+      String.match?(s, ~r/^i\d+e$/) -> {:ok, extract_int(s)}
+      true -> {:error, :not_bencoded_form}
     end
   end
 
