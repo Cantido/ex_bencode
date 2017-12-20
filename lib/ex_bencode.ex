@@ -17,6 +17,9 @@ defmodule ExBencode do
       iex> ExBencode.decode("i10e")
       {:ok, 10}
 
+      iex> ExBencode.decode("i-10e")
+      {:ok, -10}
+
       iex> ExBencode.decode("i8001e")
       {:ok, 8001}
 
@@ -29,14 +32,13 @@ defmodule ExBencode do
   """
   def decode(b)
 
-
   def decode(nil) do
     {:error, :not_bencoded_form}
   end
 
   def decode(s) do
     cond do
-      String.match?(s, ~r/^i\d+e$/) -> {:ok, extract_int(s)}
+      String.match?(s, ~r/^i-?\d+e$/) -> {:ok, extract_int(s)}
       true -> {:error, :not_bencoded_form}
     end
   end
