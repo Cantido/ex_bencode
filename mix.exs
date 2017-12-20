@@ -7,8 +7,10 @@ defmodule ExBencode.Mixfile do
       version: "0.1.0",
       elixir: "~> 1.5",
       start_permanent: Mix.env == :prod,
+      description: "An Elixir library for encoding and decoding BitTorrent's bencoding.",
       package: package(),
-      deps: deps()
+      deps: deps(),
+      source_url: "https://github.com/Cantido/ex_bencode"
     ]
   end
 
@@ -29,7 +31,7 @@ defmodule ExBencode.Mixfile do
 
   def package do
     [ name: :ex_bencode,
-      files: ["lib", "mix.exs"],
+      files: ["lib", "mix.exs", "README.md", "LICENSE"],
       maintainers: ["Rosa Richter"],
       licenses: ["GPL v3"],
       links: %{"Github" => "https://github.com/Cantido/ex_bencode"},
