@@ -52,6 +52,17 @@ defmodule ExBencode do
 
       iex> ExBencode.decode("l4:spam4:eggse")
       {:ok, ["spam", "eggs"]}
+
+      iex> ExBencode.decode("li10e4:eggse")
+      {:ok, [10, "eggs"]}
+
+  Decoding Dictionaries
+
+    iex> ExBencode.decode("de")
+    {:ok, %{}}
+
+    iex> ExBencode.decode("d3:cow3:mooe")
+    {:ok, %{"cow" => "moo"}}
   """
   def decode(b)
 
@@ -62,6 +73,7 @@ defmodule ExBencode do
   def decode(s) do
     case extract_next(s) do
       {:ok, body, ""} -> {:ok, body}
+      # Fail if there's anything leftover after we parse
       {:ok, _, _} -> {:error, :not_bencoded_form}
       {:error, msg} -> {:error, msg}
     end
@@ -72,6 +84,7 @@ defmodule ExBencode do
       String.match?(s, ~r/^i-?\d+e/) -> extract_int(s)
       String.match?(s, ~r/^\d:/) -> extract_string(s)
       String.match?(s, ~r/^l.*e/) -> extract_list(s)
+      String.match?(s, ~r/^d.*e/) -> extract_dict(s)
       true -> {:error, :not_bencoded_form}
     end
   end
@@ -95,6 +108,16 @@ defmodule ExBencode do
   defp extract_list(s) do
     {"l", tail} = String.split_at(s, 1)
     extract_list_contents({:ok, [], tail})
+  end
+
+  defp extract_dict(s) do
+    {"d", tail} = String.split_at(s, 1)
+    {:ok, contents, rest} = extract_list_contents({:ok, [], tail})
+    mapcontents = contents
+                    |> Enum.chunk(2)
+                    |> Enum.map(fn [a, b] -> {a, b} end)
+                    |> Map.new
+    {:ok, mapcontents, rest}
   end
 
   defp extract_list_contents({:ok, list, rest}) do
