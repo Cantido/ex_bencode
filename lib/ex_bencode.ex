@@ -35,6 +35,23 @@ defmodule ExBencode do
 
       iex> ExBencode.decode("4:spam")
       {:ok, "spam"}
+
+      iex> ExBencode.decode("4:too much spam")
+      {:error, :not_bencoded_form}
+
+  Decoding lists
+
+      iex> ExBencode.decode("le")
+      {:ok, []}
+
+      iex> ExBencode.decode("li10ee")
+      {:ok, [10]}
+
+      iex> ExBencode.decode("l4:spame")
+      {:ok, ["spam"]}
+
+      iex> ExBencode.decode("l4:spam4:eggse")
+      {:ok, ["spam", "eggs"]}
   """
   def decode(b)
 
@@ -43,22 +60,50 @@ defmodule ExBencode do
   end
 
   def decode(s) do
+    case extract_next(s) do
+      {:ok, body, ""} -> {:ok, body}
+      {:ok, _, _} -> {:error, :not_bencoded_form}
+      {:error, msg} -> {:error, msg}
+    end
+  end
+
+  defp extract_next(s) do
     cond do
-      String.match?(s, ~r/^i-?\d+e$/) -> {:ok, extract_int(s)}
-      String.match?(s, ~r/^\d:.*$/) -> {:ok, extract_string(s)}
+      String.match?(s, ~r/^i-?\d+e/) -> extract_int(s)
+      String.match?(s, ~r/^\d:/) -> extract_string(s)
+      String.match?(s, ~r/^l.*e/) -> extract_list(s)
       true -> {:error, :not_bencoded_form}
     end
   end
 
   defp extract_int(s) do
-    len = String.length(s)
-    substr = String.slice(s, 1, (len - 2))
+    [substr | rest] = String.split(s, ~r/i|e/, parts: 2, trim: true)
     {int, _} = Integer.parse(substr)
-    int
+    case rest do
+      [] -> {:ok, int, ""}
+      _ -> {:ok, int, hd(rest)}
+    end
   end
 
   defp extract_string(s) do
-    [_, body] = String.split(s, ":", parts: 2)
-    body
+    [lenstr, rest] = String.split(s, ":", parts: 2)
+    {length, _} = Integer.parse lenstr
+    {str, rest} = String.split_at(rest, length)
+    {:ok, str, rest}
+  end
+
+  defp extract_list(s) do
+    {"l", tail} = String.split_at(s, 1)
+    extract_list_contents({:ok, [], tail})
+  end
+
+  defp extract_list_contents({:ok, list, rest}) do
+    if String.starts_with?(rest, "e") do
+      {"e", afterlist} = String.split_at(rest, 1)
+      {:ok, list, afterlist}
+    else
+      {:ok, next, rest} = extract_next(rest)
+      extract_list_contents({:ok, list ++ [next], rest})
+    end
   end
 end
