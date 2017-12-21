@@ -29,6 +29,18 @@ defmodule ExBencode do
       iex> ExBencode.decode("4:too much spam")
       {:error, :not_bencoded_form}
 
+  Bytes are handled using the string type, with the preceding number
+  representing the byte size, not the string length.
+
+      iex> ExBencode.decode(<<?3, ?:, 1, 2, 3>>)
+      {:ok, <<1, 2, 3>>}
+
+      iex> ExBencode.decode("7:hełło")
+      {:ok, "hełło"}
+
+      iex> ExBencode.decode("5:hełło")
+      {:error, :not_bencoded_form}
+
   Decoding lists
 
       iex> ExBencode.decode("le")
@@ -83,8 +95,23 @@ defmodule ExBencode do
   defp extract_string(s) do
     [lenstr, rest] = String.split(s, ":", parts: 2)
     {length, _} = Integer.parse lenstr
-    {str, rest} = String.split_at(rest, length)
-    {:ok, str, rest}
+    {str, rest} = binary_split(rest, length)
+    if byte_size(str) != length do
+      {:error, :not_bencoded_form}
+    else
+      {:ok, str, rest}
+    end
+  end
+
+  defp binary_split(binary, position) do
+    if byte_size(binary) <= position do
+      {binary, ""}
+    else
+      tailsize = byte_size(binary) - position
+      head = binary_part(binary, 0, position)
+      tail = binary_part(binary, position, tailsize)
+      {head, tail}
+    end
   end
 
   defp extract_list(s) do

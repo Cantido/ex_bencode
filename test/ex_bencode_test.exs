@@ -22,6 +22,13 @@ defmodule ExBencodeTest do
     assert ExBencode.decode("0:") == {:ok, ""}
     assert ExBencode.decode("1:a") == {:ok, "a"}
     assert ExBencode.decode("1:ab") == {:error, :not_bencoded_form}
+    assert ExBencode.decode("2:a") == {:error, :not_bencoded_form}
+  end
+
+  test "byte string decoding" do
+    assert ExBencode.decode(<<?3, ?:, 1, 2, 3>>) == {:ok, <<1, 2, 3>>}
+    assert ExBencode.decode("d4:info" <> <<?3, ?:, 1, 2, 3>> <> "e")
+            == {:ok, %{"info" => <<1, 2, 3>>}}
   end
 
   test "list decoding" do
