@@ -10,25 +10,15 @@ defmodule ExBencode do
 
   Decoding integers
 
-      iex> ExBencode.decode(nil)
-      {:error, :not_bencoded_form}
-
-      iex> ExBencode.decode("")
-      {:error, :not_bencoded_form}
-
       iex> ExBencode.decode("i10e")
       {:ok, 10}
 
       iex> ExBencode.decode("i-10e")
       {:ok, -10}
 
-      iex> ExBencode.decode("i8001e")
-      {:ok, 8001}
+    Scientific notation is **not** supported
 
-      iex> ExBencode.decode("i")
-      {:error, :not_bencoded_form}
-
-      iex> ExBencode.decode("abcdef")
+      iex> ExBencode.decode("i1.5e7e")
       {:error, :not_bencoded_form}
 
   Decoding strings
@@ -44,17 +34,8 @@ defmodule ExBencode do
       iex> ExBencode.decode("le")
       {:ok, []}
 
-      iex> ExBencode.decode("li10ee")
-      {:ok, [10]}
-
-      iex> ExBencode.decode("l4:spame")
-      {:ok, ["spam"]}
-
       iex> ExBencode.decode("l4:spam4:eggse")
       {:ok, ["spam", "eggs"]}
-
-      iex> ExBencode.decode("li10e4:eggse")
-      {:ok, [10, "eggs"]}
 
   Decoding Dictionaries
 
@@ -63,12 +44,11 @@ defmodule ExBencode do
 
     iex> ExBencode.decode("d3:cow3:mooe")
     {:ok, %{"cow" => "moo"}}
+
+    iex> ExBencode.decode("d8:shoppingl4:eggs4:milkee")
+    {:ok, %{"shopping" => ["eggs", "milk"]}}
   """
   def decode(b)
-
-  def decode(nil) do
-    {:error, :not_bencoded_form}
-  end
 
   def decode(s) do
     case extract_next(s) do
@@ -81,6 +61,8 @@ defmodule ExBencode do
 
   defp extract_next(s) do
     cond do
+      is_nil(s) -> {:error, :not_string}
+      not String.valid?(s) -> {:error, :not_string}
       String.match?(s, ~r/^i-?\d+e/) -> extract_int(s)
       String.match?(s, ~r/^\d:/) -> extract_string(s)
       String.match?(s, ~r/^l.*e/) -> extract_list(s)
@@ -125,8 +107,10 @@ defmodule ExBencode do
       {"e", afterlist} = String.split_at(rest, 1)
       {:ok, list, afterlist}
     else
-      {:ok, next, rest} = extract_next(rest)
-      extract_list_contents({:ok, list ++ [next], rest})
+      with {:ok, next, rest} <- extract_next(rest)
+      do extract_list_contents({:ok, list ++ [next], rest})
+      else err -> err
+      end
     end
   end
 end
