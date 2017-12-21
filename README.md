@@ -2,6 +2,20 @@
 
 An Elixir library for encoding and decoding BitTorrent's bencoding
 
+## Installation
+
+The package can be installed by adding `ex_bencode` to your list of dependencies in `mix.exs`:
+
+```elixir
+def deps do
+  [
+    {:ex_bencode, "~> 1.0.0"}
+  ]
+end
+```
+
+Package docs can be found at [https://hexdocs.pm/ex_bencode](https://hexdocs.pm/ex_bencode).
+
 ## License
 
 Copyright © 2017 Rosa Richter (formerly Robert Richter)
