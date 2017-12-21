@@ -51,14 +51,14 @@ defmodule ExBencode do
 
   Decoding Dictionaries
 
-    iex> ExBencode.decode("de")
-    {:ok, %{}}
+      iex> ExBencode.decode("de")
+      {:ok, %{}}
 
-    iex> ExBencode.decode("d3:cow3:mooe")
-    {:ok, %{"cow" => "moo"}}
+      iex> ExBencode.decode("d3:cow3:mooe")
+      {:ok, %{"cow" => "moo"}}
 
-    iex> ExBencode.decode("d8:shoppingl4:eggs4:milkee")
-    {:ok, %{"shopping" => ["eggs", "milk"]}}
+      iex> ExBencode.decode("d8:shoppingl4:eggs4:milkee")
+      {:ok, %{"shopping" => ["eggs", "milk"]}}
   """
   def decode(b)
 
