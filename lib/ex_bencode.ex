@@ -130,12 +130,14 @@ defmodule ExBencode do
   end
 
   defp extract_list_contents({:ok, list, rest}) do
+    # Build the list in reverse, then reverse it at the very end.
+    # This lets us prepend entries to the list, which is much faster.
     if String.starts_with?(rest, "e") do
       {"e", afterlist} = String.split_at(rest, 1)
-      {:ok, list, afterlist}
+      {:ok, Enum.reverse(list), afterlist}
     else
       with {:ok, next, rest} <- extract_next(rest)
-      do extract_list_contents({:ok, list ++ [next], rest})
+      do extract_list_contents({:ok, [next|list], rest})
       else err -> err
       end
     end
