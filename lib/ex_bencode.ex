@@ -19,7 +19,7 @@ defmodule ExBencode do
     Scientific notation is **not** supported
 
       iex> ExBencode.decode("i1.5e7e")
-      {:error, :not_bencoded_form}
+      {:error, :unexpected_content, %{index: 5, unexpected: "7e"}}
 
   Decoding strings
 
@@ -27,7 +27,7 @@ defmodule ExBencode do
       {:ok, "spam"}
 
       iex> ExBencode.decode("4:too much spam")
-      {:error, :not_bencoded_form}
+      {:error, :unexpected_content, %{index: 6, unexpected: "much spam"}}
 
   Bytes are handled using the string type, with the preceding number
   representing the byte size, not the string length.
@@ -39,7 +39,7 @@ defmodule ExBencode do
       {:ok, "hełło"}
 
       iex> ExBencode.decode("5:hełło")
-      {:error, :not_bencoded_form}
+      {:error, :unexpected_content, %{index: 7, unexpected: <<130, 111>>}}
 
   Decoding lists
 
@@ -66,40 +66,57 @@ defmodule ExBencode do
     case extract_next(s) do
       {:ok, body, ""} -> {:ok, body}
       # Fail if there's anything leftover after we parse
-      {:ok, _, _} -> {:error, :not_bencoded_form}
+      {:ok, _, unexpected} ->
+        {
+          :error,
+          :unexpected_content,
+          %{
+            index: byte_size(s) - byte_size(unexpected),
+            unexpected: unexpected
+          }
+        }
       {:error, msg} -> {:error, msg}
+      {:error, msg, details} -> {:error, msg, details}
     end
   end
 
   defp extract_next(s) do
-    cond do
-      is_nil(s) -> {:error, :not_string}
-      not String.valid?(s) -> {:error, :not_string}
-      String.match?(s, ~r/^i-?\d+e/) -> extract_int(s)
-      String.match?(s, ~r/^\d:/) -> extract_string(s)
-      String.match?(s, ~r/^l.*e/) -> extract_list(s)
-      String.match?(s, ~r/^d.*e/) -> extract_dict(s)
-      true -> {:error, :not_bencoded_form}
+    case s do
+      _ when is_nil(s) -> {:error, :not_binary}
+      _ when not is_binary(s) -> {:error, :not_binary}
+      <<"i", _rest :: binary>> -> extract_int(s)
+      <<i, _rest :: binary>> when i >= ?0 and i <= ?9 -> extract_string(s)
+      <<"l", _rest :: binary>> -> extract_list(s)
+      <<"d", _rest :: binary>> -> extract_dict(s)
+      _ -> {:error, :not_bencoded_form}
     end
   end
 
   defp extract_int(s) do
-    [substr | rest] = String.split(s, ~r/i|e/, parts: 2, trim: true)
-    {int, _} = Integer.parse(substr)
-    case rest do
-      [] -> {:ok, int, ""}
-      _ -> {:ok, int, hd(rest)}
+    with [substr | rest] <- String.split(s, ~r/i|e/, parts: 2, trim: true),
+         {int, _} <- Integer.parse(substr)
+    do
+      case rest do
+        [] -> {:ok, int, ""}
+        _ -> {:ok, int, hd(rest)}
+      end
+    else
+      _err -> {:error, :invalid_integer}
     end
   end
 
   defp extract_string(s) do
-    [lenstr, rest] = String.split(s, ":", parts: 2)
-    {length, _} = Integer.parse lenstr
-    {str, rest} = binary_split(rest, length)
-    if byte_size(str) != length do
-      {:error, :not_bencoded_form}
+    with [lenstr, rest] <- String.split(s, ":", parts: 2),
+         {length, _} <- Integer.parse(lenstr),
+         {str, rest} <- binary_split(rest, length)
+    do
+      if byte_size(str) != length do
+        {:error, :invalid_string, %{expected_size: length, actual_size: byte_size(str)}}
+      else
+        {:ok, str, rest}
+      end
     else
-      {:ok, str, rest}
+      _ -> {:error, :invalid_string}
     end
   end
 
@@ -120,13 +137,17 @@ defmodule ExBencode do
   end
 
   defp extract_dict(s) do
-    {"d", tail} = String.split_at(s, 1)
-    {:ok, contents, rest} = extract_list_contents({:ok, [], tail})
-    mapcontents = contents
-                    |> Enum.chunk(2)
-                    |> Enum.map(fn [a, b] -> {a, b} end)
-                    |> Map.new
-    {:ok, mapcontents, rest}
+    with  {"d", tail} <- String.split_at(s, 1),
+          {:ok, contents, rest} <- extract_list_contents({:ok, [], tail})
+    do
+      mapcontents = contents
+                      |> Enum.chunk(2)
+                      |> Enum.map(fn [a, b] -> {a, b} end)
+                      |> Map.new
+      {:ok, mapcontents, rest}
+    else
+      err -> err
+    end
   end
 
   defp extract_list_contents({:ok, list, rest}) do
