@@ -32,7 +32,7 @@ defmodule ExBencode.Mixfile do
     [ name: :ex_bencode,
       files: ["lib", "mix.exs", "README.md", "LICENSE"],
       maintainers: ["Rosa Richter"],
-      licenses: ["GPL v3"],
+      licenses: ["GPL-3"],
       links: %{"Github" => "https://github.com/Cantido/ex_bencode"},
     ]
   end
