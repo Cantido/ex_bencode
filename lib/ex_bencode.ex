@@ -60,9 +60,7 @@ defmodule ExBencode do
       iex> ExBencode.decode("d8:shoppingl4:eggs4:milkee")
       {:ok, %{"shopping" => ["eggs", "milk"]}}
   """
-  def decode(b)
-
-  def decode(s) do
+  def decode(s) when is_binary(s) do
     case extract_next(s) do
       {:ok, body, ""} -> {:ok, body}
       # Fail if there's anything leftover after we parse
@@ -80,10 +78,8 @@ defmodule ExBencode do
     end
   end
 
-  defp extract_next(s) do
+  defp extract_next(s) when is_binary(s) do
     case s do
-      _ when is_nil(s) -> {:error, :not_binary}
-      _ when not is_binary(s) -> {:error, :not_binary}
       <<"i", _rest :: binary>> -> extract_int(s)
       <<i, _rest :: binary>> when i >= ?0 and i <= ?9 -> extract_string(s)
       <<"l", _rest :: binary>> -> extract_list(s)
@@ -92,7 +88,7 @@ defmodule ExBencode do
     end
   end
 
-  defp extract_int(s) do
+  defp extract_int(s) when is_binary(s) do
     with [substr | rest] <- String.split(s, ~r/i|e/, parts: 2, trim: true),
          {int, _} <- Integer.parse(substr)
     do
@@ -105,7 +101,7 @@ defmodule ExBencode do
     end
   end
 
-  defp extract_string(s) do
+  defp extract_string(s) when is_binary(s) do
     with [lenstr, rest] <- String.split(s, ":", parts: 2),
          {length, _} <- Integer.parse(lenstr),
          {str, rest} <- binary_split(rest, length)
@@ -120,23 +116,23 @@ defmodule ExBencode do
     end
   end
 
-  defp binary_split(binary, position) do
-    if byte_size(binary) <= position do
-      {binary, ""}
-    else
-      tailsize = byte_size(binary) - position
-      head = binary_part(binary, 0, position)
-      tail = binary_part(binary, position, tailsize)
-      {head, tail}
-    end
+  defp binary_split(binary, position) when is_binary(binary) and byte_size(binary) <= position do
+    {binary, ""}
   end
 
-  defp extract_list(s) do
+  defp binary_split(binary, position) when is_binary(binary) and position >= 0 do
+    tailsize = byte_size(binary) - position
+    head = binary_part(binary, 0, position)
+    tail = binary_part(binary, position, tailsize)
+    {head, tail}
+  end
+
+  defp extract_list(s) when is_binary(s) do
     {"l", tail} = String.split_at(s, 1)
     extract_list_contents({:ok, [], tail})
   end
 
-  defp extract_dict(s) do
+  defp extract_dict(s) when is_binary(s) do
     with  {"d", tail} <- String.split_at(s, 1),
           {:ok, contents, rest} <- extract_list_contents({:ok, [], tail})
     do
@@ -150,7 +146,7 @@ defmodule ExBencode do
     end
   end
 
-  defp extract_list_contents({:ok, list, rest}) do
+  defp extract_list_contents({:ok, list, rest}) when is_list(list) and is_binary(rest) do
     # Build the list in reverse, then reverse it at the very end.
     # This lets us prepend entries to the list, which is much faster.
     if String.starts_with?(rest, "e") do
