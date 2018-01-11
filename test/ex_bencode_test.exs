@@ -25,9 +25,15 @@ defmodule ExBencodeTest do
     assert hashes_count == 1812
   end
 
+  test "decode then re-encode" do
+    {:ok, original} = File.read "test/linuxmint-18.3-cinnamon-64bit.iso.torrent"
+    {:ok, decoded} = ExBencode.decode(original)
+    {:ok, encoded} = ExBencode.encode(decoded)
+
+    assert encoded == original
+  end
 
   test "bad bencode" do
-    assert ExBencode.decode(nil) == {:error, :not_binary}
     assert ExBencode.decode(1) == {:error, :not_binary}
     assert ExBencode.decode("") == {:error, :not_bencoded_form}
     assert ExBencode.decode("abcdef") == {:error, :not_bencoded_form}

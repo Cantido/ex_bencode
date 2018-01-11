@@ -163,4 +163,83 @@ defmodule ExBencode do
       end
     end
   end
+
+  @doc """
+  Encode an erlang term.
+
+  ## Examples
+
+      iex> ExBencode.encode(1)
+      {:ok, "i1e"}
+
+      iex> ExBencode.encode("hi!")
+      {:ok, "3:hi!"}
+
+      iex> ExBencode.encode([])
+      {:ok, "le"}
+
+      iex> ExBencode.encode([1])
+      {:ok, "li1ee"}
+
+      iex> ExBencode.encode(%{})
+      {:ok, "de"}
+
+      iex> ExBencode.encode(%{"cow" => "moo"})
+      {:ok, "d3:cow3:mooe"}
+
+    Note that a keyword list counts as a list of lists, so convert keyword
+    lists to maps before encoding. Otherwise, an empty keyword list
+    could either be encoded as an empty list or an empty dict, and the
+    library avoids making that kind of arbitrary decision.
+
+      iex> ExBencode.encode([cow: "moo"])
+      {:ok, "ll3:cow3:mooee"}
+
+    Use `Enum.into/2` to convert a keyword list into a map
+
+      iex> Enum.into [cow: "moo"], %{}
+      %{cow: "moo"}
+
+      iex> ExBencode.encode(%{cow: "moo"})
+      {:ok, "d3:cow3:mooe"}
+
+
+  """
+  def encode(term)
+
+  def encode(term) when is_integer(term) do
+    {:ok, "i" <> Integer.to_string(term) <> "e"}
+  end
+
+  def encode(term) when is_binary(term) do
+    len = Integer.to_string byte_size(term)
+    {:ok, len <> ":" <> term}
+  end
+
+  def encode(term) when is_atom(term) do
+    encode(Atom.to_string(term))
+  end
+
+  def encode(term) when is_list(term) do
+    {:ok, "l" <> encode_contents(term) <> "e"}
+  end
+
+  def encode(term) when is_tuple(term) do
+    encode(Tuple.to_list(term))
+  end
+
+  def encode(term) when is_map(term) do
+    ts = term |> Map.to_list |> List.keysort(0)
+    encoded_ts = for t <- ts, e = encode_contents(t), do: e
+
+    {:ok, "d" <> Enum.join(encoded_ts) <> "e"}
+  end
+
+  defp encode_contents(term) when is_list(term) do
+    Enum.join(for x <- term, {:ok, e} = encode(x), do: e)
+  end
+
+  defp encode_contents(term) when is_tuple(term) do
+    encode_contents(Tuple.to_list(term))
+  end
 end
