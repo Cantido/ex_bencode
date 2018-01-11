@@ -34,7 +34,6 @@ defmodule ExBencodeTest do
   end
 
   test "bad bencode" do
-    assert ExBencode.decode(1) == {:error, :not_binary}
     assert ExBencode.decode("") == {:error, :not_bencoded_form}
     assert ExBencode.decode("abcdef") == {:error, :not_bencoded_form}
   end

@@ -10,7 +10,8 @@ defmodule ExBencode.Mixfile do
       description: "An Elixir library for encoding and decoding BitTorrent's bencoding.",
       package: package(),
       deps: deps(),
-      source_url: "https://github.com/Cantido/ex_bencode"
+      source_url: "https://github.com/Cantido/ex_bencode",
+      dialyzer: [ flags: ["-Wunmatched_returns", :error_handling, :race_conditions, :underspecs]]
     ]
   end
 
@@ -24,7 +25,8 @@ defmodule ExBencode.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ex_doc, "~> 0.16", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.16", only: :dev, runtime: false},
+      {:dialyxir, "~> 0.5", only: [:dev], runtime: false}
     ]
   end
 
