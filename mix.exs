@@ -4,7 +4,7 @@ defmodule ExBencode.Mixfile do
   def project do
     [
       app: :ex_bencode,
-      version: "1.1.0",
+      version: "2.0.0",
       elixir: "~> 1.5",
       start_permanent: Mix.env == :prod,
       description: "An Elixir library for encoding and decoding BitTorrent's bencoding.",
