@@ -156,6 +156,66 @@ defmodule ExBencode do
     end
   end
 
+  defprotocol Bencode do
+    @fallback_to_any true
+    @doc "Encode an erlang term."
+    def encode(term)
+  end
+
+  defimpl Bencode, for: Integer do
+    def encode(term) do
+      {:ok, "i" <> Integer.to_string(term) <> "e"}
+    end
+  end
+
+  defimpl Bencode, for: BitString do
+    def encode(term) do
+      len = Integer.to_string byte_size(term)
+      {:ok, len <> ":" <> term}
+    end
+  end
+
+  defimpl Bencode, for: List do
+    def encode(term) do
+      {:ok, "l" <> encode_contents(term) <> "e"}
+    end
+
+    defp encode_contents(term) when is_list(term) do
+      Enum.join(for x <- term, {:ok, e} = Bencode.encode(x), do: e)
+    end
+  end
+
+  defimpl Bencode, for: Map do
+    def encode(term) do
+      {:ok, "d" <> encode_contents(term) <> "e"}
+    end
+
+    defp encode_contents(term) when is_map(term) do
+      term
+      |> Map.to_list
+      |> List.keysort(0)
+      |> Enum.map(&Tuple.to_list/1)
+      |> Enum.map(&encode_contents/1)
+      |> Enum.join()
+    end
+
+    defp encode_contents(term) when is_list(term) do
+      Enum.join(for x <- term, {:ok, e} = Bencode.encode(x), do: e)
+    end
+  end
+
+  defimpl Bencode, for: Tuple do
+    def encode(term) do
+      term |> Tuple.to_list() |> Bencode.encode()
+    end
+  end
+
+  defimpl Bencode, for: Any do
+    def encode(term) do
+      term |> to_string() |> Bencode.encode()
+    end
+  end
+
   @doc """
   Encode an erlang term.
 
@@ -197,41 +257,7 @@ defmodule ExBencode do
 
 
   """
-  def encode(term)
-
-  def encode(term) when is_integer(term) do
-    {:ok, "i" <> Integer.to_string(term) <> "e"}
-  end
-
-  def encode(term) when is_binary(term) do
-    len = Integer.to_string byte_size(term)
-    {:ok, len <> ":" <> term}
-  end
-
-  def encode(term) when is_atom(term) do
-    encode(Atom.to_string(term))
-  end
-
-  def encode(term) when is_list(term) do
-    {:ok, "l" <> encode_contents(term) <> "e"}
-  end
-
-  def encode(term) when is_tuple(term) do
-    encode(Tuple.to_list(term))
-  end
-
-  def encode(term) when is_map(term) do
-    ts = term |> Map.to_list |> List.keysort(0)
-    encoded_ts = for t <- ts, e = encode_contents(t), do: e
-
-    {:ok, "d" <> Enum.join(encoded_ts) <> "e"}
-  end
-
-  defp encode_contents(term) when is_list(term) do
-    Enum.join(for x <- term, {:ok, e} = encode(x), do: e)
-  end
-
-  defp encode_contents(term) when is_tuple(term) do
-    encode_contents(Tuple.to_list(term))
+  def encode(term) do
+    Bencode.encode(term)
   end
 end
