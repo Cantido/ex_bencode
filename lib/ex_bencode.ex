@@ -78,15 +78,11 @@ defmodule ExBencode do
     end
   end
 
-  defp extract_next(s) when is_binary(s) do
-    case s do
-      <<"i", _rest :: binary>> -> extract_int(s)
-      <<i, _rest :: binary>> when i >= ?0 and i <= ?9 -> extract_string(s)
-      <<"l", _rest :: binary>> -> extract_list(s)
-      <<"d", _rest :: binary>> -> extract_dict(s)
-      _ -> {:error, :not_bencoded_form}
-    end
-  end
+  defp extract_next(<<"i", _rest :: binary>> = s), do: extract_int(s)
+  defp extract_next(<<i, _rest :: binary>> = s) when i >= ?0 and i <= ?9, do: extract_string(s)
+  defp extract_next(<<"l", _rest :: binary>> = s), do: extract_list(s)
+  defp extract_next(<<"d", _rest :: binary>> = s), do: extract_dict(s)
+  defp extract_next(_), do: {:error, :not_bencoded_form}
 
   defp extract_int(s) when is_binary(s) do
     with [substr | rest] <- String.split(s, ~r/i|e/, parts: 2, trim: true),
