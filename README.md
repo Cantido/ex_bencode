@@ -2,6 +2,9 @@
 
 An Elixir library for encoding and decoding BitTorrent's bencoding
 
+[![Hex.pm](https://img.shields.io/hexpm/v/ex_bencode.svg?style=for-the-badge)](https://hex.pm/packages/ex_bencode)
+[![Travis](https://img.shields.io/travis/Cantido/ex_bencode.svg?style=for-the-badge)](https://travis-ci.org/Cantido/ex_bencode)
+![Hex.pm](https://img.shields.io/hexpm/l/ex_bencode.svg?style=for-the-badge)
 ## Installation
 
 The package can be installed by adding `ex_bencode` to your list of dependencies in `mix.exs`:
