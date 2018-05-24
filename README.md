@@ -9,7 +9,7 @@ The package can be installed by adding `ex_bencode` to your list of dependencies
 ```elixir
 def deps do
   [
-    {:ex_bencode, "~> 1.1.0"}
+    {:ex_bencode, "~> 2.0.1"}
   ]
 end
 ```
