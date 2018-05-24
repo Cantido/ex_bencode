@@ -4,7 +4,7 @@ defmodule BencodePerformanceTest do
   describe "Performance" do
     test "time performance of linux mint 18.3 torrent" do
       file = File.read!("test/linuxmint-18.3-cinnamon-64bit.iso.torrent")
-      time_per_decode = perftest(file, 10000)
+      time_per_decode = perftest(file, 500000)
 
       IO.puts("Avg time to decode: #{time_per_decode} μsec")
     end
