@@ -25,6 +25,8 @@ defmodule ExBencode.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:benchee, "~> 0.11", only: :test},
+      {:bento, "~> 0.9.2", only: :test},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false}
     ]
