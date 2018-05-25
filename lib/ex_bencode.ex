@@ -16,10 +16,13 @@ defmodule ExBencode do
       iex> ExBencode.decode("i-10e")
       {:ok, -10}
 
-    Scientific notation is **not** supported
+    Doubles and scientific notation is **not** supported
+
+      iex> ExBencode.decode("i4.2e")
+      {:error, :invalid_integer}
 
       iex> ExBencode.decode("i1.5e7e")
-      {:error, :unexpected_content, %{index: 5, unexpected: "7e"}}
+      {:error, :invalid_integer}
 
   Decoding strings
 
@@ -125,28 +128,15 @@ defmodule ExBencode do
 
   defp extract_next(_), do: {:error, :not_bencoded_form}
 
-  defp extract_int(<<"i", rest :: bits>>) do
-    extract_int(rest, [])
+  defp extract_int(<<"i", rest :: bits>>) when byte_size(rest) > 1 do
+    [intbin, afterint] = :binary.split(rest, "e", [])
+    case Integer.parse(intbin) do
+       {int, ""} -> {:ok, int, afterint}
+       {_, _} -> {:error, :invalid_integer}
+    end
   end
 
   defp extract_int(_) do
-    {:error, :invalid_integer}
-  end
-
-  defp extract_int(<<i, rest :: bits>>, acc) when (i >= ?0 and i <= ?9) or i == ?. or i == ?- do
-    extract_int(rest, [i | acc])
-  end
-
-  defp extract_int(<<"e", _ :: bits>>, []) do
-    {:error, :invalid_integer}
-  end
-
-  defp extract_int(<<"e", rest :: bits>>, acc) do
-    {int, _} = acc |> Enum.reverse() |> IO.iodata_to_binary() |> Integer.parse()
-    {:ok, int, rest}
-  end
-
-  defp extract_int(_, _) do
     {:error, :invalid_integer}
   end
 
