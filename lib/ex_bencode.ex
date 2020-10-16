@@ -193,30 +193,30 @@ defmodule ExBencode do
 
   defimpl Bencode, for: Integer do
     def encode(term) do
-      {:ok, "i" <> Integer.to_string(term) <> "e"}
+      ["i", Integer.to_string(term), "e"]
     end
   end
 
   defimpl Bencode, for: BitString do
     def encode(term) do
       len = Integer.to_string byte_size(term)
-      {:ok, len <> ":" <> term}
+      [len, ":", term]
     end
   end
 
   defimpl Bencode, for: List do
     def encode(term) do
-      {:ok, "l" <> encode_contents(term) <> "e"}
+      ["l", encode_contents(term), "e"]
     end
 
     defp encode_contents(term) when is_list(term) do
-      Enum.join(for x <- term, {:ok, e} = Bencode.encode(x), do: e)
+      Enum.map(term, &Bencode.encode/1)
     end
   end
 
   defimpl Bencode, for: Map do
     def encode(term) do
-      {:ok, "d" <> encode_contents(term) <> "e"}
+      ["d", encode_contents(term), "e"]
     end
 
     defp encode_contents(term) when is_map(term) do
@@ -225,11 +225,10 @@ defmodule ExBencode do
       |> List.keysort(0)
       |> Enum.map(&Tuple.to_list/1)
       |> Enum.map(&encode_contents/1)
-      |> Enum.join()
     end
 
     defp encode_contents(term) when is_list(term) do
-      Enum.join(for x <- term, {:ok, e} = Bencode.encode(x), do: e)
+      Enum.map(term, &Bencode.encode/1)
     end
   end
 
@@ -287,6 +286,6 @@ defmodule ExBencode do
 
   """
   def encode(term) do
-    Bencode.encode(term)
+    {:ok, Bencode.encode(term) |> :erlang.iolist_to_binary()}
   end
 end
