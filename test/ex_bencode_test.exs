@@ -82,4 +82,16 @@ defmodule ExBencodeTest do
     assert ExBencode.decode("l6:headerd5:class9:paragraphee")
             == {:ok, ["header", %{"class" => "paragraph"}]}
   end
+
+  describe "encode!/1" do
+    test "empty list" do
+      assert ExBencode.encode!([]) == "le"
+    end
+  end
+
+  describe "decode!/1" do
+    test "empty list" do
+      assert ExBencode.decode!("le") == []
+    end
+  end
 end

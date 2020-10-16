@@ -3,6 +3,20 @@ defmodule ExBencode do
   Documentation for ExBencode.
   """
 
+  def encode!(t) do
+    case encode(t) do
+      {:ok, b} -> b
+      {:error, reason} -> raise reason
+    end
+  end
+
+  def decode!(s) do
+    case decode(s) do
+      {:ok, t} -> t
+      {:error, reason} -> raise reason
+    end
+  end
+
   @doc """
   Decode the bencoded binary value.
 
