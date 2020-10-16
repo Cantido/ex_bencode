@@ -122,18 +122,18 @@ defmodule ExBencode do
   end
 
 
-  defp extract_next(<<"l", _rest :: bits>> = s) do
-    {"l", tail} = String.split_at(s, 1)
-    extract_list_contents(tail)
+  defp extract_next(<<"l", rest :: bits>> = s) do
+    extract_list_contents(rest)
   end
 
   defp extract_next(<<"d", tail :: bits>>) do
     with  {:ok, contents, rest} <- extract_list_contents(tail)
     do
-      mapcontents = contents
-                      |> Enum.chunk(2)
-                      |> Enum.map(fn [a, b] -> {a, b} end)
-                      |> Map.new
+      mapcontents =
+        contents
+        |> Enum.chunk(2)
+        |> Enum.map(fn [a, b] -> {a, b} end)
+        |> Map.new
       {:ok, mapcontents, rest}
     else
       err -> err
