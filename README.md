@@ -1,15 +1,22 @@
 # ExBencode
 
-[![Hex.pm](https://img.shields.io/hexpm/v/ex_bencode)](https://hex.pm/packages/ex_bencode/)
-![Elixir CI](https://github.com/Cantido/ex_bencode/workflows/Elixir%20CI/badge.svg)
-[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
+<!--MDOC !-->
 
-An Elixir library for encoding and decoding BitTorrent's bencoding.
+[![Elixir CI](https://github.com/Cantido/ex_bencode/workflows/Elixir%20CI/badge.svg)](https://github.com/Cantido/ex_bencode/actions)
+[![Module Version](https://img.shields.io/hexpm/v/ex_bencode)](https://hex.pm/packages/ex_bencode/)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/ex_bencode/)
+[![Total Download](https://img.shields.io/hexpm/dt/ex_bencode.svg)](https://hex.pm/packages/ex_bencode)
+[![License](https://img.shields.io/hexpm/l/ex_bencode.svg)](https://hex.pm/packages/ex_bencode)
+[![Last Updated](https://img.shields.io/github/last-commit/Cantido/ex_bencode.svg)](https://github.com/Cantido/ex_bencode/commits/master)
+
+[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](https://github.com/Cantido/ex_bencode/blob/master/CODE_OF_CONDUCT.md)
+
+An Elixir library for encoding and decoding BitTorrent's [bencoding](https://en.wikipedia.org/wiki/Bencode).
 
 ## Installation
 
-The package can be installed by adding `ex_bencode` to your list of dependencies in `mix.exs`:
+Add `ex_bencode` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -18,8 +25,6 @@ def deps do
   ]
 end
 ```
-
-Package docs can be found at [https://hexdocs.pm/ex_bencode](https://hexdocs.pm/ex_bencode).
 
 ## Usage
 
@@ -58,10 +63,12 @@ A benchmark comparing this library's performance against [`Bento`](https://githu
 Run it using `mix run`
 
 ```sh
-mix run benchmark/benchmark.exs
+$ mix run benchmark/benchmark.exs
 ```
 
-Results on my machine show that this library is just a teensy bit faster than Bento.
+Results on my machine show that this library is just a teensy bit faster than [Bento](https://github.com/folz/bento).
+
+<!--MDOC !-->
 
 ## Maintainer
 
@@ -79,7 +86,6 @@ Please see [CONTRIBUTING.md](CONTRIBUTING.md) for all the details you could ever
 
 Note that this project is released with a Contributor [Code of Conduct](code_of_conduct.md).
 By participating in this project you agree to abide by its terms.
-
 
 ## License
 

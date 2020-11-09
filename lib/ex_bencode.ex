@@ -1,7 +1,9 @@
 defmodule ExBencode do
-  @moduledoc """
-  Documentation for ExBencode.
-  """
+  @external_resource readme = "README.md"
+  @moduledoc readme
+             |> File.read!()
+             |> String.split("<!--MDOC !-->")
+             |> Enum.fetch!(1)
 
   def encode!(t) do
     case encode(t) do
@@ -97,7 +99,6 @@ defmodule ExBencode do
 
   defp extract_next(<<"i", _rest :: bits>> = s), do: extract_int(s)
 
-
   defp extract_next(<<i, _rest :: bits>> = s) when i >= ?0 and i <= ?9 do
     with [len_bin | _] <- :binary.split(s, ":"),
          header_size <- byte_size(len_bin) + 1,
@@ -120,7 +121,6 @@ defmodule ExBencode do
       _ -> {:error, :invalid_string}
     end
   end
-
 
   defp extract_next(<<"l", rest :: bits>> = s) do
     extract_list_contents(rest)
@@ -282,7 +282,6 @@ defmodule ExBencode do
 
       iex> ExBencode.encode(%{cow: "moo"})
       {:ok, "d3:cow3:mooe"}
-
 
   """
   def encode(term) do

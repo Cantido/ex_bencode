@@ -1,28 +1,40 @@
 defmodule ExBencode.Mixfile do
   use Mix.Project
 
+  @source_url "https://github.com/Cantido/ex_bencode"
+  @version "2.0.2"
+
   def project do
     [
       app: :ex_bencode,
-      version: "2.0.2",
+      version: @version,
       elixir: "~> 1.5",
-      start_permanent: Mix.env == :prod,
+      start_permanent: Mix.env() == :prod,
       description: "An Elixir library for encoding and decoding BitTorrent's bencoding.",
       package: package(),
       deps: deps(),
-      source_url: "https://github.com/Cantido/ex_bencode",
-      dialyzer: [ flags: ["-Wunmatched_returns", :error_handling, :race_conditions, :underspecs]]
+      docs: docs(),
+      source_url: @source_url,
+      dialyzer: dialyzer()
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
       extra_applications: [:logger]
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
+  def package do
+    [
+      name: :ex_bencode,
+      files: ["lib", "mix.exs", "README.md", "LICENSE"],
+      maintainers: ["Rosa Richter"],
+      licenses: ["MIT"],
+      links: %{"Github" => @source_url}
+    ]
+  end
+
   defp deps do
     [
       {:benchee, "~> 1.0", only: :dev},
@@ -32,12 +44,24 @@ defmodule ExBencode.Mixfile do
     ]
   end
 
-  def package do
-    [ name: :ex_bencode,
-      files: ["lib", "mix.exs", "README.md", "LICENSE"],
-      maintainers: ["Rosa Richter"],
-      licenses: ["MIT"],
-      links: %{"Github" => "https://github.com/Cantido/ex_bencode"},
+  defp docs do
+    [
+      main: "ExBencode",
+      api_reference: false,
+      extra_section: [],
+      source_ref: "v#{@version}",
+      source_url: @source_url
+    ]
+  end
+
+  defp dialyzer do
+    [
+      flags: [
+        "-Wunmatched_returns",
+        :error_handling,
+        :race_conditions,
+        :underspecs
+      ]
     ]
   end
 end
