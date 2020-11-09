@@ -1,12 +1,11 @@
 # ExBencode
 
-An Elixir library for encoding and decoding BitTorrent's bencoding
-
 [![Hex.pm](https://img.shields.io/hexpm/v/ex_bencode)](https://hex.pm/packages/ex_bencode/)
 ![Elixir CI](https://github.com/Cantido/ex_bencode/workflows/Elixir%20CI/badge.svg)
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
 
+An Elixir library for encoding and decoding BitTorrent's bencoding.
 
 ## Installation
 
@@ -52,6 +51,17 @@ defimpl Bencode, for: MyStruct do
   end
 end
 ```
+
+## Benchmarks
+
+A benchmark comparing this library's performance against [`Bento`](https://github.com/folz/bento) is given in the `benchmarks/` directory.
+Run it using `mix run`
+
+```sh
+mix run benchmark/benchmark.exs
+```
+
+Results on my machine show that this library is just a teensy bit faster than Bento.
 
 ## Maintainer
 
