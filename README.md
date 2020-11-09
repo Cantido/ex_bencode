@@ -2,9 +2,12 @@
 
 An Elixir library for encoding and decoding BitTorrent's bencoding
 
-[![Hex.pm](https://img.shields.io/hexpm/v/ex_bencode.svg?style=for-the-badge)](https://hex.pm/packages/ex_bencode)
-[![Travis](https://img.shields.io/travis/Cantido/ex_bencode.svg?style=for-the-badge)](https://travis-ci.org/Cantido/ex_bencode)
-![Hex.pm](https://img.shields.io/hexpm/l/ex_bencode.svg?style=for-the-badge)
+[![Hex.pm](https://img.shields.io/hexpm/v/ex_bencode)](https://hex.pm/packages/ex_bencode/)
+![Elixir CI](https://github.com/Cantido/ex_bencode/workflows/Elixir%20CI/badge.svg)
+[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
+
+
 ## Installation
 
 The package can be installed by adding `ex_bencode` to your list of dependencies in `mix.exs`:
@@ -19,12 +22,75 @@ end
 
 Package docs can be found at [https://hexdocs.pm/ex_bencode](https://hexdocs.pm/ex_bencode).
 
+## Usage
+
+Just give `ExBencode.decode/1` a binary.
+It returns a success or error tuple.
+
+```elixir
+iex> ExBencode.decode("i10e")
+{:ok, 10}
+```
+
+Give `ExBencode.encode/1` any Elixir term.
+It returns a success or error tuple as well.
+
+```elixir
+iex> ExBencode.encode("hi!")
+{:ok, "3:hi!"}
+```
+
+The bang versions of these functions, `encode!/1` and `decode!/1`,
+return the value without an error tuple, but will raise if there is an error.
+
+To customize how your structs serialize, implement the `Bencode` protocol.
+
+```elixir
+defimpl Bencode, for: MyStruct do
+  def encode(term) do
+    term |> Map.from_struct() |> ExBencode.encode()
+  end
+end
+```
+
+## Maintainer
+
+This project was developed by [Rosa Richter](https://github.com/Cantido).
+You can get in touch with her on [Keybase.io](https://keybase.io/cantido).
+
+## Contributing
+
+Questions and pull requests are more than welcome.
+I follow Elixir's tenet of bad documentation being a bug,
+so if anything is unclear, please [file an issue](https://github.com/Cantido/ex_bencode/issues/new)!
+Ideally, my answer to your question will be in an update to the docs.
+
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for all the details you could ever want about helping me with this project.
+
+Note that this project is released with a Contributor [Code of Conduct](code_of_conduct.md).
+By participating in this project you agree to abide by its terms.
+
+
 ## License
 
-Copyright © 2017 Rosa Richter (formerly Robert Richter)
+MIT License
 
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+Copyright 2020 Rosa Richter.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
 
-You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
