@@ -1,10 +1,4 @@
 defmodule ExBencode do
-  @external_resource readme = "README.md"
-  @moduledoc readme
-             |> File.read!()
-             |> String.split("<!--MDOC !-->")
-             |> Enum.fetch!(1)
-
   def encode!(t) do
     case encode(t) do
       {:ok, b} -> b
