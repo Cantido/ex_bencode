@@ -38,7 +38,7 @@ defmodule ExBencode.Mixfile do
   defp deps do
     [
       {:benchee, "~> 1.0", only: :dev},
-      {:bento, "~> 0.9.2", only: :dev},
+      {:bento, "~> 1.0.0", only: :dev},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0", only: :dev, runtime: false}
     ]
